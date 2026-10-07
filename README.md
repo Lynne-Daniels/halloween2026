@@ -25,6 +25,8 @@ tests/              # desktop pytest suite for gestures/ and responses/ logic
 - A code editor - [VS Code](https://code.visualstudio.com/) is what this project was built with.
 - **Python 3.10 or newer** on your computer (for running the desktop test suite - this is
   separate from CircuitPython, which runs _on_ the board).
+- Locate the CircutPython website (https://circuitpython.org/board/circuitplayground_bluefruit/) and download the UF2 file for
+  Adafruit Circuit Playground Bluefruit. Follow those instructions to install on the device. 
 - An Adafruit Circuit Playground Bluefruit and a USB cable that carries data (not just power -
   see plan.md's cable troubleshooting notes if `CIRCUITPY` doesn't show up as a drive).
 
@@ -79,6 +81,36 @@ Sync your code to the board (replace `D:` with your board's actual drive letter)
 ```powershell
 robocopy firmware\costume D:\ /E /XD __pycache__
 ```
+
+#### View serial output in VS Code
+
+The VS Code integrated terminal is a command prompt, not a serial monitor. To see the
+board's CircuitPython output:
+
+1. Connect the board to your computer with a USB data cable and make sure it is running
+   from its `CIRCUITPY` drive.
+2. In VS Code, open **Extensions** by clicking the Extensions icon in the Activity Bar
+   or pressing `Ctrl+Shift+X`.
+3. Search for **Serial Monitor**. Choose the extension published by **Microsoft**, then
+   click **Install**. The first time, VS Code may ask whether you trust the extension;
+   confirm to proceed.
+4. Open the Command Palette with `Ctrl+Shift+P`, type **Serial Monitor: Focus on Serial
+   Monitor View**, and press `Enter`. If that command is not listed, check that the
+   extension finished installing.
+5. In the Serial Monitor view, select the board's **COM port** and set the baud rate to
+   **115200**. If you are unsure which COM port belongs to the board, unplug the board,
+   check the available ports, then plug it back in and choose the newly appearing port.
+6. Press **Button A** on the board to turn on debug output. The status LED turns on and
+   acceleration readings or detected gestures appear in the monitor. Press Button A
+   again to turn debug output off.
+7. Locate the Start Monitoring button in the Serial Monitor and click Start. 
+
+If the monitor is blank, confirm that the program is running from `CIRCUITPY` with
+`code.py` at the drive's root, and that the board's required CircuitPython libraries
+are installed. Connect the monitor, then press the board's **Reset** button once to
+restart the program and reveal any startup error messages. Close other serial-monitor
+applications while using the VS Code monitor, since only one application can use the
+board's serial port at a time.
 
 ### WSL (Windows Subsystem for Linux)
 
