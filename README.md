@@ -103,6 +103,7 @@ board's CircuitPython output:
 6. Press **Button A** on the board to turn on debug output. The status LED turns on and
    acceleration readings or detected gestures appear in the monitor. Press Button A
    again to turn debug output off.
+7. Locate the Start Monitoring button in the Serial Monitor and click Start. 
 
 If the monitor is blank, confirm that the program is running from `CIRCUITPY` with
 `code.py` at the drive's root, and that the board's required CircuitPython libraries
