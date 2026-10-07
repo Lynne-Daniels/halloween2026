@@ -7,12 +7,11 @@ import adafruit_lis3dh
 from hardware import config as cfg
 
 _REG_CLICKSRC = 0x39
-_SINGLE_CLICK_BIT = 0x10
 _DOUBLE_CLICK_BIT = 0x20
-# Enables single AND double click detection on all axes at once. The
-# driver's built-in set_tap(tap=1) / set_tap(tap=2) modes only support one
-# mode at a time, so we pass a custom CLICK_CFG value instead: bits
-# XS,YS,ZS (single, 0x15) OR'd with XD,YD,ZD (double, 0x2A) = 0x3F.
+# On real hardware, double-click alone (CLICK_CFG with only XD/YD/ZD set)
+# failed to register reliably - also enabling single-click bits (XS/YS/ZS)
+# makes double-tap detection work, so we enable both but only ever act on
+# the DCLICK bit in software (see read_double_tap below).
 _CLICK_CFG_SINGLE_AND_DOUBLE = 0x3F
 
 
@@ -44,18 +43,15 @@ class BoardIO:
     def read_acceleration(self):
         return self._lis3dh.acceleration
 
-    def read_tap_flags(self):
-        # `.tapped` only reports "an interrupt latched", not which kind, so
-        # we read the CLICK_SRC register bits directly to tell single vs
-        # double apart (SCLICK=bit4, DCLICK=bit5). Uses a private driver
-        # method since the public API has no equivalent - verify against
-        # the installed adafruit_lis3dh version if this ever breaks.
+    def read_double_tap(self):
+        # `.tapped` can't distinguish single vs double here since both are
+        # enabled at the chip level, so read the DCLICK bit directly -
+        # single-click events are enabled on-chip (needed for reliable
+        # double-tap detection) but never surfaced in software.
         if not self._int1.value:
-            return False, False
+            return False
         raw = self._lis3dh._read_register_byte(_REG_CLICKSRC)
-        single = bool(raw & _SINGLE_CLICK_BIT)
-        double = bool(raw & _DOUBLE_CLICK_BIT)
-        return single, double
+        return bool(raw & _DOUBLE_CLICK_BIT)
 
     def button_a_pressed(self):
         return self._button_a.value

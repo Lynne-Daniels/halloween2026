@@ -4,7 +4,6 @@ from hardware.board_io import BoardIO
 from hardware import config as cfg
 from gestures.manager import GestureManager
 from responses.manager import ResponseManager
-from responses.single_flash import SingleFlash
 from responses.double_flash import DoubleFlash
 from responses.rainbow_chase import RainbowChase
 from responses.quarter_flash import QuarterFlash
@@ -24,7 +23,6 @@ def run_forever():
     responses = ResponseManager(
         cfg,
         {
-            "tap": lambda: SingleFlash(cfg),
             "double_tap": lambda: DoubleFlash(cfg),
             "jazz_hands": lambda: RainbowChase(cfg),
             "fist_bump": lambda: QuarterFlash(cfg),
@@ -38,10 +36,10 @@ def run_forever():
         debug_on = debug.poll(now)
 
         acceleration = io.read_acceleration()
-        tap_flags = io.read_tap_flags()
+        double_tap = io.read_double_tap()
         jazz_signal = _jazz_signal(*acceleration)
 
-        event = gestures.update(acceleration, tap_flags, jazz_signal, now)
+        event = gestures.update(acceleration, double_tap, jazz_signal, now)
         if event:
             responses.trigger(event.kind, now)
             debug.log("gesture: {} @ {:.3f}".format(event.kind, event.timestamp))

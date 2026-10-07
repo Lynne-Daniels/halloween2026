@@ -14,13 +14,13 @@ class GestureManager:
         self._jazz_hands = JazzHandsDetector(config)
         self._cooldown_until = 0.0
 
-    def update(self, acceleration, tap_flags, jazz_signal, now):
+    def update(self, acceleration, double_tap, jazz_signal, now):
         x, y, z = acceleration
         magnitude = (x * x + y * y + z * z) ** 0.5
 
         # Always run detectors so their internal buffers/state stay current,
         # even while suppressing results during cooldown.
-        tap_event = self._tap.update(tap_flags[0], tap_flags[1], now)
+        tap_event = self._tap.update(double_tap, now)
         fist_event = self._fist_bump.update(magnitude, now)
         jazz_event = self._jazz_hands.update(jazz_signal, now)
 
