@@ -1,3 +1,4 @@
+from gestures.base import GestureEvent
 from gestures.tap import TapDetector
 from gestures.fist_bump import FistBumpDetector
 from gestures.jazz_hands import JazzHandsDetector
@@ -7,14 +8,15 @@ class GestureManager:
     """Feeds each sample to all detectors, then applies priority + cooldown
     so at most one gesture event fires per cooldown window."""
 
-    def __init__(self, config):
+    def __init__(self, config, jazz_profile=None):
         self._config = config
         self._tap = TapDetector()
         self._fist_bump = FistBumpDetector(config)
-        self._jazz_hands = JazzHandsDetector(config)
+        self._jazz_hands = JazzHandsDetector(config, jazz_profile)
         self._cooldown_until = 0.0
+        self._button_b_was_pressed = False
 
-    def update(self, acceleration, double_tap, jazz_signal, now):
+    def update(self, acceleration, double_tap, jazz_signal, now, button_b_pressed=False):
         x, y, z = acceleration
         magnitude = (x * x + y * y + z * z) ** 0.5
 
@@ -23,6 +25,10 @@ class GestureManager:
         tap_event = self._tap.update(double_tap, now)
         fist_event = self._fist_bump.update(magnitude, now)
         jazz_event = self._jazz_hands.update(jazz_signal, now)
+        button_b_pressed_edge = button_b_pressed and not self._button_b_was_pressed
+        self._button_b_was_pressed = button_b_pressed
+        if button_b_pressed_edge:
+            jazz_event = GestureEvent("jazz_hands", now)
 
         if now < self._cooldown_until:
             return None

@@ -20,6 +20,9 @@ class BoardIO:
 
     def __init__(self):
         self.pixels = neopixel.NeoPixel(board.NEOPIXEL, cfg.NUM_PIXELS, auto_write=False)
+        self.strip = neopixel.NeoPixel(
+            board.A1, cfg.STRIP_NUM_PIXELS, auto_write=False
+        )
 
         i2c = busio.I2C(board.ACCELEROMETER_SCL, board.ACCELEROMETER_SDA)
         self._int1 = digitalio.DigitalInOut(board.ACCELEROMETER_INTERRUPT)
@@ -36,6 +39,12 @@ class BoardIO:
 
         self._button_a = digitalio.DigitalInOut(board.BUTTON_A)
         self._button_a.switch_to_input(pull=digitalio.Pull.DOWN)
+
+        self._button_b = digitalio.DigitalInOut(board.BUTTON_B)
+        self._button_b.switch_to_input(pull=digitalio.Pull.DOWN)
+
+        self._learning_switch = digitalio.DigitalInOut(board.SLIDE_SWITCH)
+        self._learning_switch.switch_to_input(pull=digitalio.Pull.UP)
 
         self._status_led = digitalio.DigitalInOut(board.LED)
         self._status_led.direction = digitalio.Direction.OUTPUT
@@ -56,6 +65,12 @@ class BoardIO:
     def button_a_pressed(self):
         return self._button_a.value
 
+    def button_b_pressed(self):
+        return self._button_b.value
+
+    def learning_mode_selected(self):
+        return self._learning_switch.value
+
     def set_status_led(self, on):
         self._status_led.value = on
 
@@ -63,3 +78,19 @@ class BoardIO:
         for i, color in enumerate(pixel_buffer):
             self.pixels[i] = color
         self.pixels.show()
+
+    def show_strip(self, pixel_buffer):
+        for i, color in enumerate(pixel_buffer):
+            self.strip[i] = color
+        self.strip.show()
+
+    def show_learning_cue(self, color):
+        for i in range(cfg.NUM_PIXELS):
+            self.pixels[i] = cfg.COLORS["off"]
+        self.pixels[0] = color
+        self.pixels.show()
+
+        for i in range(cfg.STRIP_NUM_PIXELS):
+            self.strip[i] = cfg.COLORS["off"]
+        self.strip[0] = color
+        self.strip.show()

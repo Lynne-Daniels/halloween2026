@@ -17,6 +17,7 @@ firmware/
     hardware/       # the only code that touches board/neopixel/adafruit_lis3dh
     gestures/       # pure-logic gesture detectors (hardware-import-free, desktop-testable)
     responses/      # pure-logic light animations (hardware-import-free, desktop-testable)
+    learning/       # guided calibration, profile selection, and NVM storage
 tests/              # desktop pytest suite for gestures/ and responses/ logic
 ```
 
@@ -75,6 +76,56 @@ Plug in the board (it will appear as a new drive letter, e.g. `D:\`), then:
 ```powershell
 circup install neopixel adafruit_lis3dh
 ```
+
+The built-in 10-pixel NeoPixel remains enabled. An additional 60-pixel NeoPixel
+strip can be connected to A1; power the strip from a suitable external 5 V supply
+and connect the supply ground to the board ground. Existing gesture animations
+are mirrored across both outputs.
+
+#### Operation and learning modes
+
+The onboard slide switch selects the mode. On the Circuit Playground Bluefruit,
+the left position reads high with the pull-up input and selects learning mode;
+the right position selects normal operation.
+
+In **operation mode**, gestures are detected and the existing light responses
+run. Button B continues to trigger the jazz-hands response manually.
+
+In **learning mode**, normal gesture responses pause. The board guides the wearer
+through five examples each of jazz hands, fist-bump-like movement, waving, and
+resting still, followed by a short validation set. Trials are interleaved. Wait
+for the repeated cue, then press Button B once to start its three-flash countdown.
+Perform the prompted movement (or remain still) while the purple recording light
+is on. Two red flashes mark the end of each recording. The first pixel on the
+built-in ring and the first pixel on the A1 strip display the cues; other pixels
+stay dark during calibration. Moving the slider back to operation mode cancels
+an unfinished calibration; incomplete examples are not saved.
+
+| Cue | Trial or meaning |
+| --- | --- |
+| 1 cyan flash, repeated twice | Perform jazz hands |
+| 2 orange flashes, repeated twice | Perform a fist-bump-like movement |
+| 3 red flashes, repeated twice | Wave your arm normally |
+| 4 white flashes, repeated twice | Stay still |
+| 3 short white countdown flashes | Get ready; recording starts next |
+| Steady purple light | Perform the prompted motion or stay still |
+| 2 red flashes | That trial's recording is complete |
+| Alternating cyan and green | Calibration passed and profile saved |
+| Blinking red | Examples did not separate reliably; previous profile kept |
+
+The trial cue repeats until Button B is pressed. The recording lasts about
+3 seconds. The five training rounds rotate through all four trial types; the
+validation then uses three new jazz-hands attempts and three comparison trials.
+Calibration compares the x/y/z acceleration features and saves only an axis and
+simple thresholds—not a trained model. It saves that small profile in the
+board's nonvolatile memory, so it remains available after a reset. If calibration
+cannot separate jazz hands from the comparison movements, no new profile is
+saved. The previous valid profile remains in use.
+
+The board prints a labeled feature summary for each trial and the calibration
+result to the USB serial console. Connect the Serial Monitor before starting if
+you want to review those summaries. Calibration uses only the first pixel on
+each output for cues to limit LED power during the session.
 
 Sync your code to the board (replace `D:` with your board's actual drive letter):
 

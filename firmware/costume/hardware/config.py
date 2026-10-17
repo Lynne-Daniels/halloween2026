@@ -28,6 +28,7 @@ JAZZ_HANDS_MIN_AMPLITUDE = 3.0  # m/s^2 deviation from mean to count as a revers
 
 # --- NeoPixel ring ---
 NUM_PIXELS = 10
+STRIP_NUM_PIXELS = 60
 COLORS = {
     "cyan": (0, 255, 255),
     "orange": (255, 80, 0),

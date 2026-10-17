@@ -10,8 +10,13 @@ class JazzHandsDetector:
     placeholder pending on-hardware confirmation per plan.md).
     """
 
-    def __init__(self, config):
+    def __init__(self, config, profile=None):
         self._config = config
+        self._min_reversals = config.JAZZ_HANDS_MIN_REVERSALS
+        self._min_amplitude = config.JAZZ_HANDS_MIN_AMPLITUDE
+        if profile is not None:
+            self._min_reversals = profile["min_reversals"]
+            self._min_amplitude = profile["min_amplitude"]
         self._samples = []  # list of (timestamp, signal)
 
     def update(self, signal, now):
@@ -31,14 +36,14 @@ class JazzHandsDetector:
         prev_sign = None
         for value in values:
             deviation = value - mean
-            if abs(deviation) < cfg.JAZZ_HANDS_MIN_AMPLITUDE:
+            if abs(deviation) < self._min_amplitude:
                 continue
             sign = 1 if deviation > 0 else -1
             if prev_sign is not None and sign != prev_sign:
                 reversals += 1
             prev_sign = sign
 
-        if reversals >= cfg.JAZZ_HANDS_MIN_REVERSALS:
+        if reversals >= self._min_reversals:
             self._samples = []
             return GestureEvent("jazz_hands", now)
         return None
